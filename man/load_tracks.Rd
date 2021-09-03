@@ -28,6 +28,7 @@ on Runkeeper's website, e.g. runkeeper-data-export-12517482-2016-05-20-1550.zip.
 
 Unzip the contents of this \code{.zip} file to a directory (refer to this as \code{gpxdir}).
 }
+
 \examples{
 ## load test data distributed with this package
 ## test data is a single track; 
@@ -35,9 +36,8 @@ Unzip the contents of this \code{.zip} file to a directory (refer to this as \co
 ## https://en.wikipedia.org/wiki/Anstey_Hill_Recreation_Park
 
 library(runkeepR)
-routes <- load_tracks(system.file("extdata", package="runkeepR"))
+routes <- load_tracks(system.file("extdata", package = "runkeepR"))
 class(routes) 
 ## [1] "runkeepR_data" "data.frame"  
 
 }
-

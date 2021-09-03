@@ -28,9 +28,8 @@ read in elevation from Runkeeper(TM) files.
 ## https://en.wikipedia.org/wiki/Anstey_Hill_Recreation_Park
 
 library(runkeepR)
-routes <- load_tracks(system.file("extdata", package="runkeepR"))
+routes <- load_tracks(system.file("extdata", package = "runkeepR"))
 class(routes) 
 ## [1] "runkeepR_data" "data.frame"  
 
 }
-

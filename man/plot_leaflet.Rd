@@ -24,4 +24,3 @@ Plot the loaded routes using leaflet
 \dontrun{plot_leaflet(routes, filterType="Walking", trackPal="Accent")}
 
 }
-

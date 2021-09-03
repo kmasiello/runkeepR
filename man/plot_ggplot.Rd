@@ -4,8 +4,13 @@
 \alias{plot_ggplot}
 \title{Plot Runkeeper(TM) route data using ggplot2}
 \usage{
-plot_ggplot(routes_all, filterType = NULL, trackPal = rainbow(7),
-  center = NULL, zoom = 13)
+plot_ggplot(
+  routes_all,
+  filterType = NULL,
+  trackPal = rainbow(7),
+  center = NULL,
+  zoom = 13
+)
 }
 \arguments{
 \item{routes_all}{loaded and processed routes}
@@ -31,4 +36,3 @@ distinct colours.
 \dontrun{plot_ggplot(routes, filterType="Walking", trackPal=rainbow(8), zoom=14)}
 
 }
-

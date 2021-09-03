@@ -27,4 +27,3 @@ Convert points to lines
 \url{https://rpubs.com/walkerke/points_to_line}
 }
 \keyword{Internal}
-

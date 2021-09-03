@@ -27,5 +27,4 @@ Suggests:
     testthat,
     covr
 LazyData: true
-RoxygenNote: 5.0.1
-Suggests: testthat
+RoxygenNote: 7.1.1

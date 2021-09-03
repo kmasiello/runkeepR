@@ -16,4 +16,3 @@ summarise_runs(rundata, by = "trkname", dashboard = TRUE)
 \description{
 Show a summary of the Runkeeper(TM) data
 }
-
