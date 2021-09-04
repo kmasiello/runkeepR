@@ -40,7 +40,7 @@ read_RK_GPX <- function(gpxfile) {
   latitude  <- c()
   trackid   <- c()
   elevation <- c()
-  time      <- c(.POSIXct(character(0)))
+  time      <- c()# TO DELETE c(.POSIXct(character(0)))
   
   for (itrack in (2 + seq_len(ntracks))) {  
     top1track     <- top[[1]][[itrack]]
@@ -53,8 +53,12 @@ read_RK_GPX <- function(gpxfile) {
       time      <- c(time, as.POSIXct(xmlSApply(top1track[[ipt]], xmlValue)[["time"]], format = "%Y-%m-%dT%H:%M:%SZ"))
     }
   }
+  time <- lubridate::as_datetime(time)
   
-  outObject <- data.frame(trackid, trkname, trkdesc, latitude, longitude, elevation, time, gpxfile, stringsAsFactors = FALSE)
+  # outObject <- data.frame(trackid, trkname, trkdesc, latitude, longitude, elevation, time, gpxfile, stringsAsFactors = FALSE)
+  outObject <- tidyr::tibble(trackid, trkname, trkdesc, latitude, longitude, elevation, time, gpxfile)
+  
+  
   
   class(outObject) <- c("runkeepR_data", class(outObject))
   
@@ -104,45 +108,68 @@ load_tracks <- function(gpxdir) {
   
   files <- dir(file.path(gpxdir), pattern = "\\.gpx", full.names = TRUE)
   
-  routes_list <- lapply(files, read_RK_GPX)
+  # TO DELETE 
+  # routes_list <- lapply(files, read_RK_GPX)
+  # routes <- as.data.frame(do.call(rbind, routes_list), stringsAsFactors = FALSE)  
+  # END TO DELETE 
   
-  routes <- as.data.frame(do.call(rbind, routes_list), stringsAsFactors = FALSE)  
+  routes <- purrr::map_df(files, read_RK_GPX)
   
   # save(routes, file="~/Dropbox/Freelancer/runkeepR/example/routes_all.rds")
   
-  meta_data <- read.csv(file.path(gpxdir, "cardioActivities.csv"), stringsAsFactors = FALSE)
+  meta_data <- tidyr::read_csv(file.path(gpxdir, "cardioActivities.csv")) %>% 
+    dplyr::mutate(gpxfile = ifelse(`GPX File` == "", 
+                               NA, 
+                               paste0(path.expand(gpxdir),"/",`GPX File`))) %>% 
+    dplyr::select(-`GPX File`)
+  # TO DELETE
   # meta_data %<>% mutate_(gpxfile=lazyeval::interp(~ifelse(y=="", NA, paste0(path.expand(gpxdir),"/",y)), y="GPX.File"), "GPX.File"=NULL)
-  meta_data %<>% mutate_(gpxfile = lazyeval::interp(~ifelse(y == "", 
-                                                            NA, 
-                                                            paste0(path.expand(gpxdir),"/",y)), 
-                                                    y = as.name("GPX.File")))
+  # meta_data %<>% mutate_(gpxfile = lazyeval::interp(~ifelse(y == "", 
+  #                                                           NA, 
+  #                                                           paste0(path.expand(gpxdir),"/",y)), 
+  #                                                   y = as.name("GPX.File")))
+  # 
+  # END TO DELETE
   
   # Bind routes
   # routes <- left_join(routes, meta_data, by="gpxfile") %>% arrange(index)
-  routes_all <- merge(meta_data, routes, by = "gpxfile") %>% arrange_(~time)
+  routes_all <- dplyr::left_join(meta_data, routes, by = "gpxfile")
+    #TO DELETE: merge(meta_data, routes, by = "gpxfile") %>% arrange_(~time)
   
   ## process dates
-  routes_all$Date  <- as.POSIXct(routes_all$Date)
-  routes_all$Year  <- year(routes_all$Date)
-  routes_all$Month <- month(routes_all$Date)
-  routes_all$Day   <- day(routes_all$Date)
+  # TO DELETE
+  # routes_all$Date  <- as.POSIXct(routes_all$Date)
+  # routes_all$Year  <- year(routes_all$Date)
+  # routes_all$Month <- month(routes_all$Date)
+  # routes_all$Day   <- day(routes_all$Date)
+  # End TO DELETE
+  routes_all <- routes_all %>% 
+    dplyr::mutate(Year = lubridate::year(Date), 
+           Month = lubridate::month(Date), 
+           Day = lubridate::day(Date)) %>% 
+    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(hms(Duration))) %>% 
+    dplyr::select(gpxfile, trkname, trkdesc, Type, trackid, Date, Year, Month, Day, 
+                  time, Duration, Duration_sec, tidyr::everything())
   
+  # TO DELETE
   ## copy durations to total minutes
-  routes_all$Duration..seconds. <- unlist(lapply(strsplit(routes_all$Duration, ":"), 
-                                                 function(x) {
-                                                   x <- as.integer(x)
-                                                   if (length(x) == 3) {
-                                                     x[1] * 60L * 60L + x[2] * 60L + x[3]
-                                                   } else if (length(x) == 2) {
-                                                     x[1] * 60L + x[2]
-                                                   }
-                                                 }))
+  # routes_all$Duration..seconds. <- unlist(lapply(strsplit(routes_all$Duration, ":"), 
+  #                                                function(x) {
+  #                                                  x <- as.integer(x)
+  #                                                  if (length(x) == 3) {
+  #                                                    x[1] * 60L * 60L + x[2] * 60L + x[3]
+  #                                                  } else if (length(x) == 2) {
+  #                                                    x[1] * 60L + x[2]
+  #                                                  }
+  #                                                }))
   
   ## re-arrange, put POSIX fields next to each other
-  routes_all %<>% select_("gpxfile", "trkname", "trkdesc", "Type", 
-                          "trackid", "Date", "Year", "Month", "Day", 
-                          "time", "Duration", "Duration..seconds.", 
-                          lazyeval::interp(~everything()))
+  # routes_all %<>% select_("gpxfile", "trkname", "trkdesc", "Type", 
+  #                         "trackid", "Date", "Year", "Month", "Day", 
+  #                         "time", "Duration", "Duration..seconds.", 
+  #                         lazyeval::interp(~everything()))
+  
+  ### END TO DELETE
   
   class(routes_all) <- c("runkeepR_data", class(routes_all))
   
