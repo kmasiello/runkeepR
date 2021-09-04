@@ -117,12 +117,18 @@ load_tracks <- function(gpxdir) {
   
   # save(routes, file="~/Dropbox/Freelancer/runkeepR/example/routes_all.rds")
   
-  meta_data <- readr::read_csv(file.path(gpxdir, "cardioActivities.csv")) %>% 
+  meta_data <- readr::read_csv(file.path(gpxdir, "cardioActivities.csv"), 
+                               col_types = cols(Duration = col_character())) %>% 
     dplyr::mutate(gpxfile = ifelse(`GPX File` == "", 
                                    NA, 
                                    paste0(path.expand(gpxdir),"/",`GPX File`))) %>% 
-    dplyr::select(-`GPX File`) %>% 
-    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(lubridate::hms(Duration)))
+    dplyr::select(-`GPX File`)
+  
+  pad_hms <- function(duration){
+    ifelse(nchar(duration) < 6, paste0("00:", duration), duration)
+  }
+  
+  meta_data$Duration_sec <- lubridate::hms(pad_hms(meta_data$Duration)) %>% lubridate::period_to_seconds()
   
   # TO DELETE
   # meta_data %<>% mutate_(gpxfile=lazyeval::interp(~ifelse(y=="", NA, paste0(path.expand(gpxdir),"/",y)), y="GPX.File"), "GPX.File"=NULL)
