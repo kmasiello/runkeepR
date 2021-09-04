@@ -27,8 +27,8 @@ summarise_runs <- function(rundata, by = "trkname", dashboard = TRUE) {
   
   # if(is.null(by)) by <- "trkname"
   
-  cols_to_process <- c("Duration..seconds.", "Distance..km.", 
-                       "Calories.Burned", "Climb..m.", "elevation")
+  cols_to_process <- c("Duration_sec", "Distance (mi)", 
+                       "Calories.Burned", "Climb (ft)", "elevation")
   
   # mins  <- numdata %>% group_by_(by) %>% summarise_each_(funs(min(., na.rm=TRUE)),    vars=cols_to_process)
   # mins1  <- numdata %>% group_by_(by) %>% summarise_each_(funs(min(., na.rm=TRUE)),    vars=cols_to_process)
@@ -51,8 +51,8 @@ summarise_runs <- function(rundata, by = "trkname", dashboard = TRUE) {
   
   if (!dashboard) {
     
-    numdata_sum <- numdata %>% select_("monthBin", "Duration..seconds.", "Distance..km.", 
-                                       "Calories.Burned", "Climb..m.", "elevation") %>% 
+    numdata_sum <- numdata %>% select_("monthBin", "Duration_sec", "Distance (mi)", 
+                                       "Calories.Burned", "Climb (ft)", "elevation") %>% 
       group_by_("monthBin") %>% 
       summarise_each_(funs(sum), vars = lazyeval::interp(~everything()))
     
@@ -123,8 +123,8 @@ summarise_runs <- function(rundata, by = "trkname", dashboard = TRUE) {
       output$plot1 <- renderPlot({
         if (input$window == "monthly") {
           numdata_sum <- numdata %>% filter_(~Year == input$slider) %>% 
-            select_("monthBin", "Duration..seconds.", "Distance..km.", 
-                    "Calories.Burned", "Climb..m.", "elevation") %>% 
+            select_("monthBin", "Duration_sec", "Distance (mi)", 
+                    "Calories.Burned", "Climb (ft)", "elevation") %>% 
             group_by_("monthBin") %>% 
             summarise_each_(funs_(input$fn), 
                             vars = lazyeval::interp(~everything()))
@@ -143,8 +143,8 @@ summarise_runs <- function(rundata, by = "trkname", dashboard = TRUE) {
                           y = paste0(input$fn,"(Value)"))
         } else if (input$window == "daily") {
           numdata_sum <- numdata %>% filter_(~Year == input$slider) %>% 
-            select_("yday", "Duration..seconds.", "Distance..km.", "Calories.Burned", 
-                    "Climb..m.", "elevation") %>% 
+            select_("yday", "Duration_sec", "Distance (mi)", "Calories.Burned", 
+                    "Climb (ft)", "elevation") %>% 
             group_by_("yday") %>% 
             summarise_each_(funs_(input$fn), 
                             vars = lazyeval::interp(~everything()))
