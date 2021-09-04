@@ -147,9 +147,10 @@ load_tracks <- function(gpxdir) {
     dplyr::mutate(Year = lubridate::year(Date), 
            Month = lubridate::month(Date), 
            Day = lubridate::day(Date)) %>% 
-    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(lubridate::hms(Duration))) %>% 
+    dplyr::mutate(duration_temp = lubridate::hms(Duration)) %>% 
+    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(duration_temp)) %>% 
     dplyr::select(gpxfile, trkname, trkdesc, Type, trackid, Date, Year, Month, Day, 
-                  time, Duration, Duration_sec, tidyr::everything())
+                  time, Duration, Duration_sec, tidyr::everything(), -duration_temp)
   
   # TO DELETE
   ## copy durations to total minutes
