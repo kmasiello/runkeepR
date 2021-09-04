@@ -119,9 +119,11 @@ load_tracks <- function(gpxdir) {
   
   meta_data <- readr::read_csv(file.path(gpxdir, "cardioActivities.csv")) %>% 
     dplyr::mutate(gpxfile = ifelse(`GPX File` == "", 
-                               NA, 
-                               paste0(path.expand(gpxdir),"/",`GPX File`))) %>% 
-    dplyr::select(-`GPX File`)
+                                   NA, 
+                                   paste0(path.expand(gpxdir),"/",`GPX File`))) %>% 
+    dplyr::select(-`GPX File`) %>% 
+    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(lubridate::hms(Duration)))
+  
   # TO DELETE
   # meta_data %<>% mutate_(gpxfile=lazyeval::interp(~ifelse(y=="", NA, paste0(path.expand(gpxdir),"/",y)), y="GPX.File"), "GPX.File"=NULL)
   # meta_data %<>% mutate_(gpxfile = lazyeval::interp(~ifelse(y == "", 
@@ -147,10 +149,8 @@ load_tracks <- function(gpxdir) {
     dplyr::mutate(Year = lubridate::year(Date), 
            Month = lubridate::month(Date), 
            Day = lubridate::day(Date)) %>% 
-    dplyr::mutate(duration_temp = lubridate::hms(Duration)) %>% 
-    dplyr::mutate(Duration_sec = lubridate::period_to_seconds(duration_temp)) %>% 
     dplyr::select(gpxfile, trkname, trkdesc, Type, trackid, Date, Year, Month, Day, 
-                  time, Duration, Duration_sec, tidyr::everything(), -duration_temp)
+                  time, Duration, Duration_sec, tidyr::everything())
   
   # TO DELETE
   ## copy durations to total minutes
