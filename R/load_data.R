@@ -117,7 +117,7 @@ load_tracks <- function(gpxdir) {
   
   # save(routes, file="~/Dropbox/Freelancer/runkeepR/example/routes_all.rds")
   
-  meta_data <- tidyr::read_csv(file.path(gpxdir, "cardioActivities.csv")) %>% 
+  meta_data <- readr::read_csv(file.path(gpxdir, "cardioActivities.csv")) %>% 
     dplyr::mutate(gpxfile = ifelse(`GPX File` == "", 
                                NA, 
                                paste0(path.expand(gpxdir),"/",`GPX File`))) %>% 
