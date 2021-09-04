@@ -1,7 +1,7 @@
 Package: runkeepR
 Type: Package
 Title: Extract, analyse, and plot Runkeeper(TM) data
-Version: 0.0.09000
+Version: 0.0.09100
 Date: 2016-06-07
 Authors@R: c(person("Jonathan", "Carroll", , "jono@jcarroll.com.au", c("aut", "cre")))
 Maintainer: J. Carroll <jono@jcarroll.com.au>
