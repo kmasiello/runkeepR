@@ -13,50 +13,39 @@
 #' 
 #' @export
 #'
-summarise_runs <- function(rundata, by = "trkname", dashboard = TRUE) {
+summarise_runs <- function(rundata, dashboard = TRUE) {
   
   rundata$yday <- lubridate::yday(rundata$Date)
   
   numcols         <- sapply(rundata, is.numeric)
   numcols["Date"] <- TRUE
-  numcols[by]     <- TRUE
+  numcols["trkname"]     <- TRUE
   
-  numdata <- rundata[numcols] %>% select_(quote(-latitude), quote(-longitude)) %>% unique
+  numdata <- rundata[numcols] %>% select(-latitude, -longitude) %>% unique
   
   numdata$monthBin <- as.character(cut(as.Date(numdata$Date), breaks = "month"))
   
-  # if(is.null(by)) by <- "trkname"
-  
   cols_to_process <- c("Duration_sec", "Distance (mi)", 
-                       "Calories.Burned", "Climb (ft)", "elevation")
+                       "Calories Burned", "Climb (ft)", "elevation")
   
   # mins  <- numdata %>% group_by_(by) %>% summarise_each_(funs(min(., na.rm=TRUE)),    vars=cols_to_process)
   # mins1  <- numdata %>% group_by_(by) %>% summarise_each_(funs(min(., na.rm=TRUE)),    vars=cols_to_process)
   
-  mins  <- numdata %>% group_by_(by) %>% summarise_each_(funs(min(.,  na.rm = TRUE)), vars = cols_to_process)
-  means <- numdata %>% group_by_(by) %>% summarise_each_(funs(mean(., na.rm = TRUE)), vars = cols_to_process)
-  maxs  <- numdata %>% group_by_(by) %>% summarise_each_(funs(max(.,  na.rm = TRUE)), vars = cols_to_process)
-  sums  <- numdata %>% group_by_(by) %>% summarise_each_(funs(sum(.,  na.rm = TRUE)), vars = cols_to_process)
+  mins  <- numdata %>% group_by(Date) %>% summarise_at(cols_to_process, min)
+  means <- numdata %>% group_by(Date) %>% summarise_at(cols_to_process, mean, na.rm = TRUE)
+  sums  <- numdata %>% group_by(Date) %>% summarise_at(cols_to_process, sum, na.rm = TRUE)
+  maxs  <- numdata %>% group_by(Date) %>% summarise_at(cols_to_process, max)
   
-  if (by != "trkname") {
-    message("min:")
-    print(data.frame(mins))
-    message("mean:")
-    print(data.frame(means))
-    message("max:")
-    print(data.frame(maxs))
-    message("total:")
-    print(data.frame(sums))
-  }
+
   
   if (!dashboard) {
     
-    numdata_sum <- numdata %>% select_("monthBin", "Duration_sec", "Distance (mi)", 
-                                       "Calories.Burned", "Climb (ft)", "elevation") %>% 
-      group_by_("monthBin") %>% 
-      summarise_each_(funs(sum), vars = lazyeval::interp(~everything()))
+    numdata_sum <- numdata %>% select(monthBin,"Duration_sec", "Distance (mi)", 
+                                       "Calories Burned", "Climb (ft)", "elevation") %>% 
+      group_by(monthBin) %>% 
+      summarise_all(sum, na.rm = TRUE)
     
-    numdata_long <- numdata_sum %>% ungroup %>% tidyr::gather_("QUANTITY", "VALUE", -1)
+    numdata_long <- numdata_sum %>% ungroup %>% tidyr::gather("QUANTITY", "VALUE", -1)
     gg <- ggplot(numdata_long, aes_(x = ~as.Date(monthBin), y = ~VALUE)) 
     gg <- gg + geom_bar(stat = "identity", fill = "steelblue1") 
     gg <- gg + facet_wrap(~QUANTITY, scales = "free_y") 
