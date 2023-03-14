@@ -4,14 +4,14 @@
 \alias{summarise_runs}
 \title{Show a summary of the Runkeeper(TM) data}
 \usage{
-summarise_runs(rundata, by = "trkname", dashboard = TRUE)
+summarise_runs(rundata, dashboard = TRUE)
 }
 \arguments{
 \item{rundata}{the data to process}
 
-\item{by}{grouping category. Default is \code{trkname}; the unique tracks.}
-
 \item{dashboard}{present the information in a shinydashboard?}
+
+\item{by}{grouping category. Default is \code{trkname}; the unique tracks.}
 }
 \description{
 Show a summary of the Runkeeper(TM) data

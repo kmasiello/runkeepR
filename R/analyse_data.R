@@ -74,7 +74,7 @@ summarise_runs <- function(rundata, dashboard = TRUE) {
         
         fluidRow(
           box(title = "Year",
-              sliderInput("slider", "Year:", min(unique(rundata$Year)), max(unique(rundata$Year)), 1, animate = TRUE), width = 4
+              sliderInput("slider", "Year:", min(unique(rundata$Year)), max(unique(rundata$Year)), 2021, animate = TRUE), width = 4
           ),
           box(title = "Function",
               radioButtons("fn", "Function:", c("sum", "mean", "max"), selected="mean"), width = 4
@@ -111,15 +111,15 @@ summarise_runs <- function(rundata, dashboard = TRUE) {
       
       output$plot1 <- renderPlot({
         if (input$window == "monthly") {
-          numdata_sum <- numdata %>% filter_(~Year == input$slider) %>% 
-            select_("monthBin", "Duration_sec", "Distance (mi)", 
-                    "Calories.Burned", "Climb (ft)", "elevation") %>% 
-            group_by_("monthBin") %>% 
-            summarise_each_(funs_(input$fn), 
-                            vars = lazyeval::interp(~everything()))
-          numdata_long <- numdata_sum %>% ungroup %>% tidyr::gather_("QUANTITY", "VALUE", -1) 
+          numdata_sum <- numdata %>% filter(lubridate::year(Date) == input$slider) %>% 
+            select(monthBin,"Duration_sec", "Distance (mi)", 
+                               "Calories Burned", "Climb (ft)", "elevation") %>% 
+            group_by(monthBin) %>% 
+            summarise_all(input$fn, na.rm = TRUE)
+           
+          numdata_long <- numdata_sum %>% ungroup %>% tidyr::gather("QUANTITY", "VALUE", -1) 
           ## NB: this usage of gather_ is possibly wrong; http://stackoverflow.com/a/29605376/4168169
-          gg <- ggplot(numdata_long, aes_(x = ~as.Date(monthBin), y = ~VALUE)) 
+          gg <- ggplot(numdata_long, aes(x = ~as.Date(monthBin), y = ~VALUE)) 
           gg <- gg + scale_x_date(date_breaks = "1 month", date_labels = "%B")
           gg <- gg + labs(title = paste0(input$slider," Runkeeper Data"), 
                           subtitle = paste0(nrow(rundata %>% filter_(~Year == input$slider)), 
